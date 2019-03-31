@@ -12,21 +12,23 @@ def check_status(tracking_id, year):
         "Tracking": tracking_id,
     }
     
+    # print('checking ' + tracking_id)
     r = requests.post(url, headers=headers, json=payload,)
     if r.status_code == 200:
         x = r.json()
         #print('found tracking ' + str(tracking_id))
         for status in x['d']:
             if research('ENTREGADO', status['RetornoCadena4']):
-                #print('delivered ' + str(tracking_id))
+                # print('delivered ' + str(tracking_id))
                 return "delivered"
             elif research('SI DESEA PUEDE RECOGERLO', status['RetornoCadena4']):
-                #print('can pick up ' + str(tracking_id))
+                # print('can pick up ' + str(tracking_id))
                 return "can_pickup"
             else:
-                #print('in transit ' + str(tracking_id))
+                # print('in transit ' + str(tracking_id))
                 return "in_transit"
     else:
+        print('not found')
         pass
 
 
@@ -58,31 +60,53 @@ def sendEmail(message):
         s.quit()
 
 
-packages_file = "/home/ppinzon/better_serpost/packages.json"
-#packages_file = "packages.json"
+#packages_file = "/home/ppinzon/better_serpost/packages.json"
+packages_file = "packages.json"
 
 with open(packages_file, "r") as read_file:
     data = json.load(read_file)
 
+
+toDelete = []
+
 for package,year in list(data['unchecked'].items()):
     status = check_status(package, year)
     if status == "delivered":
-        del data['unchecked'][package]
+        toDelete.append(package)
+        #del data['unchecked'][package]
     elif status == "can_pickup":
         sendEmail(package + " can be picked up")
-        del data['unchecked'][package]
+        toDelete.append(package)
+        #del data['unchecked'][package]
     elif status == "in_transit":
         data['in_transit'][package] = year
         sendEmail(package + " is in transit")
-        del data['unchecked'][package]
+        toDelete.append(package)
+        #del data['unchecked'][package]
+
+# print(toDelete)
+
+for package in toDelete:
+    del data['unchecked'][package]
+
+toDelete = []
 
 for package,year in data['in_transit'].items():
     status = check_status(package, year,)
     if status == "in_transit":
         pass
+    elif status == "delivered":
+        toDelete.append(package)
+        #del data['unchecked'][package]
     elif status == "can_pickup":
         sendEmail(package + " can be picked up")
-        del data['in_transit'][package]
+        toDelete.append(package)
+        #del data['in_transit'][package]
+
+# print(toDelete)
+
+for package in toDelete:
+    del data['in_transit'][package]
 
 with open(packages_file, "w") as write_file:
     json.dump(data, write_file, indent=4)
