@@ -21,7 +21,7 @@ def check_status(tracking_id, year):
             if research('ENTREGADO', status['RetornoCadena4']):
                 # print('delivered ' + str(tracking_id))
                 return "delivered"
-            elif research('DISPONIBLE PARA ENTREGA', status['RetornoCadena4']):
+            elif research('DISPONIBLE PARA ENTREGA EN EL CENTRO DE DISTRIBUCIÓN', status['RetornoCadena4']):
                 # print('can pick up ' + str(tracking_id))
                 return "can_pickup"
             else:
