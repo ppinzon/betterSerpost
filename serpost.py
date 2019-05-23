@@ -21,7 +21,7 @@ def check_status(tracking_id, year):
             if research('ENTREGADO', status['RetornoCadena4']):
                 # print('delivered ' + str(tracking_id))
                 return "delivered"
-            elif research('SI DESEA PUEDE RECOGERLO', status['RetornoCadena4']):
+            elif research('DISPONIBLE PARA ENTREGA', status['RetornoCadena4']):
                 # print('can pick up ' + str(tracking_id))
                 return "can_pickup"
             else:
@@ -60,8 +60,8 @@ def sendEmail(message):
         s.quit()
 
 
-#packages_file = "/home/ppinzon/better_serpost/packages.json"
-packages_file = "packages.json"
+packages_file = "/home/ppinzon/better_serpost/packages.json"
+#packages_file = "packages.json"
 
 with open(packages_file, "r") as read_file:
     data = json.load(read_file)
