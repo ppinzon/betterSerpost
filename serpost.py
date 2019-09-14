@@ -28,7 +28,7 @@ def check_status(tracking_id, year):
                 # print('in transit ' + str(tracking_id))
                 return "in_transit"
     else:
-        print('not found')
+        # print('not found')
         pass
 
 
