@@ -1,6 +1,8 @@
-import pprint, requests, json, smtplib, ssl, re, creds
+import requests, json, smtplib, ssl, re, creds
 from email.mime.text import MIMEText
 from email.header    import Header
+
+from pprint import pprint
 
 def check_status(tracking_id, year):
     url = 'http://clientes.serpost.com.pe/prj_online/Web_Busqueda.aspx/Consultar_Tracking_Detalle_IPS'
@@ -60,53 +62,53 @@ def sendEmail(message):
         s.quit()
 
 
-packages_file = "/home/ppinzon/better_serpost/packages.json"
-#packages_file = "packages.json"
+packages_file = creds.jsonpath
 
 with open(packages_file, "r") as read_file:
     data = json.load(read_file)
 
-
 toDelete = []
 
-for package,year in list(data['unchecked'].items()):
-    status = check_status(package, year)
+for ind, package in enumerate(data['unchecked']):
+    package_id = package['id']
+    year = package['year']
+    description = package['description']
+    
+    status = check_status(package_id, year)
     if status == "delivered":
-        toDelete.append(package)
-        #del data['unchecked'][package]
+        toDelete.append(ind)
     elif status == "can_pickup":
-        sendEmail(package + " can be picked up")
-        toDelete.append(package)
-        #del data['unchecked'][package]
+        sendEmail(description + " can be picked up")
+        toDelete.append(ind)
     elif status == "in_transit":
-        data['in_transit'][package] = year
-        sendEmail(package + " is in transit")
-        toDelete.append(package)
-        #del data['unchecked'][package]
+        data['in_transit'].append(package)
+        sendEmail(description + " is in transit")
+        toDelete.append(ind)
 
-# print(toDelete)
 
-for package in toDelete:
+for package in sorted(toDelete, reverse=True):
     del data['unchecked'][package]
 
 toDelete = []
 
-for package,year in data['in_transit'].items():
+for ind, package in enumerate(data['in_transit']):
+    package_id = package['id']
+    year = package['year']
+    description = package['description']
+    
     status = check_status(package, year,)
     if status == "in_transit":
         pass
     elif status == "delivered":
-        toDelete.append(package)
-        #del data['unchecked'][package]
+        sendEmail(description + " has been delivered")
+        toDelete.append(ind)
     elif status == "can_pickup":
-        sendEmail(package + " can be picked up")
-        toDelete.append(package)
-        #del data['in_transit'][package]
+        sendEmail(description + " can be picked up")
+        toDelete.append(ind)
 
-# print(toDelete)
 
-for package in toDelete:
-    del data['in_transit'][package]
+for package in sorted(toDelete, reverse=True):
+    del data['un_checked'][package]
 
 with open(packages_file, "w") as write_file:
     json.dump(data, write_file, indent=4)
