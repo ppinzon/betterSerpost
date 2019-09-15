@@ -78,11 +78,11 @@ for ind, package in enumerate(data['unchecked']):
     if status == "delivered":
         toDelete.append(ind)
     elif status == "can_pickup":
-        sendEmail(description + " can be picked up")
+        sendEmail(f"Your {description} ({package_id}) can be picked up")
         toDelete.append(ind)
     elif status == "in_transit":
         data['in_transit'].append(package)
-        sendEmail(description + " is in transit")
+        sendEmail(f"Your {description} ({package_id}) is in transit")
         toDelete.append(ind)
 
 
@@ -100,10 +100,10 @@ for ind, package in enumerate(data['in_transit']):
     if status == "in_transit":
         pass
     elif status == "delivered":
-        sendEmail(description + " has been delivered")
+        sendEmail(f"Your {description} ({package_id}) has been delivered")
         toDelete.append(ind)
     elif status == "can_pickup":
-        sendEmail(description + " can be picked up")
+        sendEmail(f"Your {description} ({package_id}) can be picked up")
         toDelete.append(ind)
 
 
